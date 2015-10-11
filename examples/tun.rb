@@ -18,6 +18,8 @@ end
 require 'rb_tuntap'
 require 'timeout'
 
+require 'packetfu'
+
 DEV_NAME = 'tun0'
 DEV_ADDR1 = '192.168.192.168'
 DEV_ADDR2 = '3ffe::1'
@@ -36,17 +38,19 @@ tun.up
 STDOUT.puts("** Interface stats (as seen by ifconfig)")
 STDOUT.puts(`ifconfig #{tun.ifname}`)
 
-STDOUT.puts("** Reading 4 bytes from the tun device (waiting 5s)")
+STDOUT.puts("** Reading from the tun device (waiting 5s)")
 bytes = ''
 begin
   Timeout::timeout(5) {
-    io = tun.to_io
-    bytes = io.sysread(1000)
+    loop do
+      io = tun.to_io
+      bytes = io.sysread(1500)
+      pk = PacketFu::Packet.parse(bytes)
+      p pk
+    end
   }
 rescue Timeout::Error
-  STDOUT.puts("Nothing to read")
-else
-  STDOUT.puts("Read: #{bytes.hexs}")
+  STDOUT.puts("** 5 seconds are done")
 end
 
 STDOUT.puts("** Bringing down and closing device")
