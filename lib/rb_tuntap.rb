@@ -1,5 +1,5 @@
 require 'ipaddr'
-require 'rb_tuntap_ext'
+require 'rb_tuntap/rb_tuntap_ext'
 
 module RbTunTap
 
@@ -90,8 +90,8 @@ module RbTunTap
     def validate_address!(addr)
       ip = IPAddr.new(addr)
 
-      unless ip.ipv4?
-        raise NotImplementedError, 'Only IPv4 is supported by this library'
+      unless ip.ipv4? || ip.ipv6?
+        raise NotImplementedError, 'Only IPv4 and IPv6 is supported by this library'
       end
 
       if addr.include?('/')

@@ -1,3 +1,15 @@
+# RbTunTap-OSX
+
+Ported to OSX.
+Please install Tunnelblick and
+
+```
+sudo kextload /Applications/Tunnelblick.app/Contents/Resources/tap-signed.kext
+sudo kextload /Applications/Tunnelblick.app/Contents/Resources/tun-signed.kext
+```
+
+TO DO: Make this work with native Apple utun.
+
 # RbTunTap
 
 This gem provides the ability to manipulate (create, configure, persist, delete) tun and tap interfaces (for Linux). Most of the library is implemented as a C extension since it needs to request the changes (creation, deletion, of interfaces) from the kernel via syscalls. Given the relatively complex structures that are involved, it is easier to do this in C than using ffi. The ruby land wrapper code provides a simpler (more ruby-esque) API for ruby programs to interface with.
