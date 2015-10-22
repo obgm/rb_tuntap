@@ -20,7 +20,7 @@ These interfaces provide packet reception and transmission capabilities for user
 
 ## Platforms
 
-Currently this is only developed (and tested) on Linux (Ubuntu 12.04 and 14.04), however it should work on other (modern) Linux kernels/distributions as well (kernels that ship with most popular distributions support this).
+Currently this is only developed (and tested) on Linux (Ubuntu 12.04 and 14.04 and Debian 8), however it should work on other (modern) Linux kernels/distributions as well (kernels that ship with most popular distributions support this).
 
 ## Installation
 
@@ -72,6 +72,8 @@ Next, you'll want to configure the device (e.g. tun):
 ```ruby
 tun.addr    = "192.168.168.1"
 tun.netmask = "255.255.255.0"
+
+tun.addr    = "3ffe::1/64"
 ```
 
 And then bring up the interface:
