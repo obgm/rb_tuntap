@@ -1,3 +1,4 @@
+require 'os'
 require 'socket'
 
 module RbTunTap
@@ -28,21 +29,32 @@ module RbTunTap
     end
 
     def open(pkt_info)          # what to do with pkt_info?
-      (0..15).detect do |num|
-        ifname = "#{@type}#{num}"
-        begin
-          @io = File.open("/dev/#{ifname}", "rb+")
-          @ifname = ifname
-        rescue
-          nil
+        case OS.host_os
+        when /linux/
+          ifname = @name
+          @io = File.open("#{@dev}", "rb+")
+          buf = [ifname, (@type == "tap" ? IFF_TAP : IFF_TUN) | IFF_NO_PI, ""]
+                .pack("Z#{IFNAMSIZ}S_a#{IFREQ_SIZE-IFNAMSIZ-2}")
+          @io.ioctl(TUNSETIFF, buf)
+          @ifname = buf.unpack("Z#{IFNAMSIZ}").shift
+        else
+          (0..15).detect do |num|
+            begin
+              ifname = "#{@type}#{num}"
+              @io = File.open("/dev/#{ifname}", "rb+")
+              @ifname = ifname
+            rescue
+              nil
+            end
+          end
         end
-      end
       raise "Can't open #{@type}" unless @io
     end
 
     attr_reader :ifname
 
-    def set_addr(name)
+    def set_addr(addrstr)
+      name, prefixlen = addrstr.split("/")
       _offname, _aliasnames, af, addr = Socket.gethostbyname(name)
       sin = Socket::sockaddr_in(0, name)
       case af
@@ -50,10 +62,23 @@ module RbTunTap
         buf = [@ifname, sin].pack(IFREQ_PACK)
         RbTunTap.sock.ioctl(SIOCSIFADDR, buf)
       when Socket::PF_INET6
+        prefixlen = "128" if prefixlen.nil?
+        case OS.host_os
+        when /linux/
+          buf = [@ifname, ""].pack(IFREQ_PACK)
+          RbTunTap.sock.ioctl(SIOCGIFINDEX, buf)
+          _ifname, union = buf.unpack(IFREQ_PACK)
+          ifindex, = union.unpack("i")    # read ifr.if_index
+
+          # IN6_IFREQ_PACK
+          buf = [addr, prefixlen.to_i, ifindex].pack("a16Li")
+          RbTunTap.sock6.ioctl(SIOCSIFADDR, buf)
+        else
         lifetimes = [0, 0, -1, -1].pack("QQll")
         buf = [@ifname, sin, '', Socket.sockaddr_in(0, "FFFF:FFFF:FFFF:FFFF::"),
                0, lifetimes].pack(IN6_ALIASREQ_PACK)
         RbTunTap.sock6.ioctl(SIOCAIFADDR_IN6, buf)
+        end
       else
         raise "Unknown address family #{af} for #{name} = #{addr.inspect}"
       end
