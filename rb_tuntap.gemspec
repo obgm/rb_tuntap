@@ -4,10 +4,10 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'rb_tuntap/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = "rb_tuntap_osx"
+  spec.name          = "rb_tuntap"
   spec.version       = RbTunTap::VERSION::STRING
-  spec.authors       = ["Akshay Moghe", "Carsten Bormann"]
-  spec.email         = ["akshay.moghe@gmail.com", "cabo@tzi.org"]
+  spec.authors       = ["Akshay Moghe", "Carsten Bormann", "Olaf Bergmann"]
+  spec.email         = ["akshay.moghe@gmail.com", "cabo@tzi.org", "bergmann@tzi.org"]
   spec.summary       = "Ruby library for working with tun/tap devices, forked for OSX."
   spec.description   = ("This library allows you to create and interact with " \
                         "TUN/TAP devices using Ruby. See the README for a " \
