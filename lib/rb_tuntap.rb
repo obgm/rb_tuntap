@@ -94,10 +94,6 @@ module RbTunTap
         raise NotImplementedError, 'Only IPv4 and IPv6 is supported by this library'
       end
 
-      if addr.include?('/')
-        raise ArgumentError, 'Please specify a host IP address (without mask)'
-      end
-
       addr.to_s
     end
 
