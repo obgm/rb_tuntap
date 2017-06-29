@@ -85,16 +85,8 @@ module RbTunTap
     end
 
     def up(desired = IFF_UP)
-      buf = [@ifname, [0].pack("S")].pack(IFREQ_PACK)
-      RbTunTap.sock.ioctl(SIOCGIFFLAGS, buf)
-      _ifname, union = buf.unpack(IFREQ_PACK)
-      flags, = union.unpack("S")
-      unless flags & IFF_UP != desired
-        flags &= ~IFF_UP
-        flags |= desired
-        buf = [@ifname, [flags].pack("S")].pack(IFREQ_PACK)
-        RbTunTap.sock.ioctl(SIOCSIFFLAGS, buf)
-      end
+      up_io(RbTunTap.sock, desired)
+      up_io(RbTunTap.sock6, desired)
     end
 
     def down
@@ -105,6 +97,21 @@ module RbTunTap
       if @io
         @io.close
         @io = nil
+      end
+    end
+
+    private
+
+    def up_io(io, desired)
+      buf = [@ifname, [0].pack("S")].pack(IFREQ_PACK)
+      io.ioctl(SIOCGIFFLAGS, buf)
+      _ifname, union = buf.unpack(IFREQ_PACK)
+      flags, = union.unpack("S")
+      unless flags & IFF_UP != desired
+        flags &= ~IFF_UP
+        flags |= desired | (1<<6)
+        buf = [@ifname, [flags].pack("S")].pack(IFREQ_PACK)
+        io.ioctl(SIOCSIFFLAGS, buf)
       end
     end
 
