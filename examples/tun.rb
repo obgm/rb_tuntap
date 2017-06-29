@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+lib = File.expand_path('../../lib', __FILE__)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 class ::String
   def hexi
@@ -21,8 +23,8 @@ require 'timeout'
 require 'packetfu'
 
 DEV_NAME = 'tun0'
-DEV_ADDR1 = '192.168.192.168'
-DEV_ADDR2 = '3ffe::1'
+DEV_ADDR1 = '192.168.192.168/24'
+DEV_ADDR2 = '3ffe::1/64'
 
 STDOUT.puts("** Opening tun device as #{DEV_NAME}")
 tun = RbTunTap::TapDevice.new(DEV_NAME)
@@ -36,7 +38,7 @@ tun.addr = DEV_ADDR2
 tun.up
 
 STDOUT.puts("** Interface stats (as seen by ifconfig)")
-STDOUT.puts(`ifconfig #{tun.ifname}`)
+STDOUT.puts(`/sbin/ifconfig #{tun.ifname}`)
 
 STDOUT.puts("** Reading from the tun device (waiting 5s)")
 bytes = ''
