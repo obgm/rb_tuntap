@@ -107,12 +107,12 @@ module RbTunTap
       io.ioctl(SIOCGIFFLAGS, buf)
       _ifname, union = buf.unpack(IFREQ_PACK)
       flags, = union.unpack("S")
-      unless flags & IFF_UP != desired
+      unless flags & IFF_UP == desired
         flags &= ~IFF_UP
         flags |= desired | (1<<6)
         buf = [@ifname, [flags].pack("S")].pack(IFREQ_PACK)
         io.ioctl(SIOCSIFFLAGS, buf)
-      end
+     end
     end
 
   end
